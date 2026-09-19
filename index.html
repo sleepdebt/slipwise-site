@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slipwise — Marina management, without the module tax</title>
+<meta name="description" content="Flat-priced slip, contract, and payment management for independently-owned marinas. One tool, one price, no add-on modules.">
+<style>
+  :root {
+    --ink: #12202b;
+    --ink-soft: #4a5c68;
+    --ink-faint: #8494a0;
+    --navy-900: #0a2c3e;
+    --navy-800: #0d3b54;
+    --navy-700: #10465f;
+    --sea-500: #0e7ab0;
+    --sea-600: #0b6392;
+    --sea-700: #0e5a8a;
+    --sea-050: #eaf6fc;
+    --sea-100: #d7eef8;
+    --success: #1f7a4d;
+    --success-muted: #e1f4e9;
+    --surface: #ffffff;
+    --surface-canvas: #f4f2ee;
+    --surface-sunken: #f8f7f4;
+    --border: #e4e0d8;
+    --border-strong: #d3cec2;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 3px rgba(18,32,43,.07), 0 1px 2px rgba(18,32,43,.04);
+    --shadow-md: 0 8px 24px rgba(18,32,43,.10), 0 2px 6px rgba(18,32,43,.05);
+    --shadow-lg: 0 20px 48px rgba(10,44,62,.18);
+    --ease: cubic-bezier(.4,0,.2,1);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--surface-canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(244,242,238,.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 750; font-size: 18px; color: var(--navy-900); }
+  .brand svg { color: var(--sea-600); }
+  .nav-links { display: flex; align-items: center; gap: 30px; }
+  .nav-links a.nl { font-size: 14.5px; font-weight: 550; color: var(--ink-soft); transition: color .15s var(--ease); }
+  .nav-links a.nl:hover { color: var(--ink); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 20px; border-radius: 9px; font-size: 14.5px; font-weight: 600;
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink);
+    cursor: pointer; transition: all .15s var(--ease);
+  }
+  .btn:hover { background: var(--surface-sunken); border-color: var(--ink-faint); }
+  .btn-primary {
+    background: linear-gradient(180deg, var(--sea-500) 0%, var(--sea-600) 100%);
+    border-color: transparent; color: #fff;
+    box-shadow: 0 1px 2px rgba(14,122,176,.25), 0 4px 12px rgba(14,122,176,.2);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, #128cc6 0%, var(--sea-700) 100%); box-shadow: 0 2px 8px rgba(14,122,176,.32); }
+  .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 11px; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 84px 0 96px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ''; position: absolute; top: -220px; right: -180px; width: 640px; height: 640px;
+    background: radial-gradient(circle, var(--sea-100) 0%, transparent 68%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 650;
+    color: var(--sea-700); background: var(--sea-050); border: 1px solid var(--sea-100);
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--sea-500); }
+  h1.hero-h {
+    font-size: clamp(34px, 5vw, 54px); line-height: 1.08; font-weight: 780; letter-spacing: -.02em;
+    color: var(--navy-900); max-width: 760px; margin: 0 0 22px;
+  }
+  h1.hero-h .accent { color: var(--sea-600); }
+  .hero-sub { font-size: 18px; line-height: 1.6; color: var(--ink-soft); max-width: 580px; margin: 0 0 34px; }
+  .hero-ctas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .hero-note { font-size: 13.5px; color: var(--ink-faint); }
+
+  /* Hero product mock */
+  .hero-mock {
+    margin-top: 64px; border-radius: var(--radius-lg); background: var(--surface);
+    border: 1px solid var(--border); box-shadow: var(--shadow-lg); overflow: hidden;
+  }
+  .mock-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: var(--surface-sunken); border-bottom: 1px solid var(--border); }
+  .mock-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); }
+  .mock-body { display: grid; grid-template-columns: 190px 1fr; min-height: 340px; }
+  .mock-side { background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-700) 100%); padding: 20px 14px; }
+  .mock-side-item { padding: 8px 10px; border-radius: 7px; font-size: 12.5px; color: #bcdae8; margin-bottom: 3px; font-weight: 550; }
+  .mock-side-item.active { background: rgba(255,255,255,.14); color: #fff; }
+  .mock-main { padding: 26px 28px; }
+  .mock-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .mock-stat { background: var(--surface-sunken); border-radius: 10px; padding: 14px; text-align: center; }
+  .mock-stat b { display: block; font-size: 21px; color: var(--navy-900); }
+  .mock-stat span { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+  .mock-rows { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .mock-row { display: grid; grid-template-columns: 70px 1fr 90px; gap: 10px; padding: 11px 14px; font-size: 12.5px; align-items: center; border-bottom: 1px solid var(--surface-sunken); }
+  .mock-row:last-child { border-bottom: none; }
+  .mock-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 650; background: var(--success-muted); color: var(--success); justify-self: start; }
+
+  /* ---------- Section shared ---------- */
+  section { padding: 88px 0; }
+  .section-head { max-width: 620px; margin: 0 0 48px; }
+  .section-kicker { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--sea-600); margin-bottom: 10px; }
+  h2.section-h { font-size: clamp(26px, 3.4vw, 36px); font-weight: 750; letter-spacing: -.015em; color: var(--navy-900); margin: 0 0 14px; }
+  .section-sub { font-size: 16px; line-height: 1.6; color: var(--ink-soft); margin: 0; }
+
+  /* ---------- Problem strip ---------- */
+  .problem { background: var(--navy-900); color: #fff; }
+  .problem .section-sub { color: #a9c9db; }
+  .problem .section-kicker { color: #7fd4ff; }
+  .problem h2.section-h { color: #fff; }
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px;
+  }
+  .compare-card { border-radius: var(--radius-md); padding: 26px; border: 1px solid rgba(255,255,255,.12); }
+  .compare-card.bad { background: rgba(255,255,255,.04); }
+  .compare-card.good { background: linear-gradient(155deg, rgba(14,122,176,.22), rgba(14,122,176,.06)); border-color: rgba(127,212,255,.3); }
+  .compare-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .compare-title.bad-t { color: #f0a89e; }
+  .compare-title.good-t { color: #7fd4ff; }
+  .compare ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .compare li { font-size: 14.5px; color: #cfe1ea; display: flex; gap: 10px; line-height: 1.5; }
+  .compare li::before { content: '—'; opacity: .5; flex-shrink: 0; }
+  .compare .good li::before { content: '✓'; color: #7fd4ff; opacity: 1; font-weight: 700; }
+
+  /* ---------- Features (Configure/Monitor surfaces, one idea per row) ---------- */
+  .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; padding: 56px 0; border-bottom: 1px solid var(--border); }
+  .feature-row:last-child { border-bottom: none; }
+  .feature-row.reverse .feature-copy { order: 2; }
+  .feature-row.reverse .feature-visual { order: 1; }
+  .feature-num { font-size: 13px; font-weight: 700; color: var(--sea-600); margin-bottom: 12px; }
+  .feature-copy h3 { font-size: 24px; font-weight: 720; color: var(--navy-900); margin: 0 0 12px; letter-spacing: -.01em; }
+  .feature-copy p { font-size: 15.5px; line-height: 1.65; color: var(--ink-soft); margin: 0; }
+  .feature-visual {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm); padding: 22px; min-height: 220px;
+  }
+  /* mini visuals */
+  .viz-slips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .viz-slip { width: 64px; height: 54px; border-radius: 8px; font-size: 10px; font-weight: 700; padding: 6px; }
+  .viz-slip span { display: block; font-size: 8.5px; font-weight: 550; opacity: .8; margin-top: 3px; }
+  .viz-a { background: #e2eede; color: #27512f; }
+  .viz-o { background: #dde8f2; color: #1d3f5e; }
+  .viz-m { background: #f6e2de; color: #7c3328; }
+  .viz-waitlist { display: flex; flex-direction: column; gap: 8px; }
+  .viz-wrow { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-sunken); border-radius: 8px; font-size: 12.5px; }
+  .viz-wrow b { font-weight: 650; }
+  .viz-wchip { font-size: 10.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; background: var(--sea-050); color: var(--sea-700); }
+  .viz-invoice { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .viz-irow { display: grid; grid-template-columns: 1fr 70px 60px; gap: 8px; padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--surface-sunken); align-items: center; }
+  .viz-irow:last-child { border-bottom: none; }
+  .viz-irow.head { background: var(--surface-sunken); font-weight: 700; color: var(--ink-faint); font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; }
+  .viz-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--success-muted); color: var(--success); justify-self: start; }
+  .viz-report { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .viz-rcell { background: var(--surface-sunken); border-radius: 8px; padding: 14px; text-align: center; }
+  .viz-rcell b { display: block; font-size: 19px; color: var(--navy-900); }
+  .viz-rcell span { font-size: 10.5px; color: var(--ink-faint); font-weight: 600; }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .price-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 32px 28px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+  }
+  .price-card.feat {
+    border-color: var(--sea-500); box-shadow: 0 0 0 1px var(--sea-500), var(--shadow-md);
+    position: relative;
+  }
+  .price-tag {
+    position: absolute; top: -13px; left: 28px; background: var(--sea-600); color: #fff;
+    font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 999px;
+  }
+  .price-tier { font-size: 14.5px; font-weight: 650; color: var(--ink-soft); margin-bottom: 6px; }
+  .price-amt { font-size: 38px; font-weight: 780; color: var(--navy-900); letter-spacing: -.02em; margin-bottom: 2px; }
+  .price-amt span { font-size: 15px; font-weight: 550; color: var(--ink-faint); }
+  .price-slips { font-size: 13.5px; color: var(--ink-faint); margin-bottom: 22px; }
+  .price-card ul { list-style: none; margin: 0 0 26px; padding: 0; display: flex; flex-direction: column; gap: 11px; flex: 1; }
+  .price-card li { font-size: 14px; color: var(--ink-soft); display: flex; gap: 9px; line-height: 1.5; }
+  .price-card li::before { content: '✓'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+  .pricing-foot { text-align: center; margin-top: 30px; font-size: 14px; color: var(--ink-faint); }
+
+  /* ---------- Final CTA ---------- */
+  .cta-band {
+    background: linear-gradient(155deg, var(--navy-900) 0%, var(--navy-700) 55%, var(--sea-700) 130%);
+    border-radius: var(--radius-lg); padding: 64px 56px; color: #fff; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-band h2 { font-size: clamp(26px, 3.4vw, 34px); font-weight: 750; margin: 0 0 14px; letter-spacing: -.015em; }
+  .cta-band p { font-size: 16px; color: #bcdae8; max-width: 480px; margin: 0 auto 32px; line-height: 1.6; }
+  .cta-band .btn-primary { background: #fff; color: var(--navy-900); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+  .cta-band .btn-primary:hover { background: #eaf6fc; }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 0; }
+  .foot-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .foot-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--navy-900); font-size: 15px; }
+  .foot-brand svg { color: var(--sea-600); }
+  .foot-note { font-size: 13px; color: var(--ink-faint); }
+
+  @media (max-width: 860px) {
+    .compare, .pricing-grid, .mock-body { grid-template-columns: 1fr; }
+    .feature-row, .feature-row.reverse { grid-template-columns: 1fr; }
+    .feature-row.reverse .feature-copy, .feature-row.reverse .feature-visual { order: initial; }
+    .nav-links .nl { display: none; }
+    .mock-side { display: none; }
+    .cta-band { padding: 44px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 8a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4Z"/><path d="M4 15c1.5 3 4.5 5 8 5s6.5-2 8-5"/><circle cx="12" cy="15" r="1"/></svg>
+      Slipwise
+    </div>
+    <nav class="nav-links">
+      <a class="nl" href="#features">Features</a>
+      <a class="nl" href="#pricing">Pricing</a>
+      <a class="btn" href="https://slipwise-one.vercel.app/login">Sign in</a>
+      <a class="btn btn-primary" href="https://slipwise-one.vercel.app/login">Start free</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Built for 40–150 slip marinas</span>
+    <h1 class="hero-h">Run your marina without paying for <span class="accent">five modules</span> you don't need.</h1>
+    <p class="hero-sub">
+      Slip assignments, contracts, waitlists, invoicing, and reporting — one flat-priced tool
+      for independently-owned marinas. No fuel dock module, no POS add-on, no per-feature
+      pricing stack.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="https://slipwise-one.vercel.app/login">Sign in to Slipwise</a>
+      <a class="btn btn-lg" href="#pricing">See pricing</a>
+    </div>
+    <p class="hero-note">No setup fee. No annual contract. Map your slips and take your first payment the same day.</p>
+
+    <div class="hero-mock">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="mock-side-item active">Dashboard</div>
+          <div class="mock-side-item">Slip Map</div>
+          <div class="mock-side-item">Contracts</div>
+          <div class="mock-side-item">Waitlist</div>
+          <div class="mock-side-item">Invoices</div>
+          <div class="mock-side-item">Reports</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-stat-row">
+            <div class="mock-stat"><b>14</b><span>SLIPS</span></div>
+            <div class="mock-stat"><b>12</b><span>AVAILABLE</span></div>
+            <div class="mock-stat"><b>1</b><span>OCCUPIED</span></div>
+            <div class="mock-stat"><b>$4,200</b><span>OUTSTANDING</span></div>
+          </div>
+          <div class="mock-rows">
+            <div class="mock-row" style="background:var(--surface-sunken); font-weight:700; color:var(--ink-faint); font-size:11px; text-transform:uppercase;">
+              <span>SLIP</span><span>RENTER</span><span>STATUS</span>
+            </div>
+            <div class="mock-row"><span>A1</span><span>Marv Hendricks</span><span class="mock-pill">ACTIVE</span></div>
+            <div class="mock-row"><span>B6</span><span>—</span><span class="mock-pill" style="background:#f7edd2;color:#6e5514;">HOLD</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-kicker">The problem</div>
+      <h2 class="section-h">Incumbents sell you a bundle. You need three things.</h2>
+      <p class="section-sub">
+        Dockwa and DockMaster price slip booking, contracts, billing, POS, and fuel management
+        as separate modules starting at $169–$249/month each. A marina that just wants slip
+        booking, contracts, and payments ends up paying $500–700+/month for capability it's
+        forced to buy in bundles.
+      </p>
+    </div>
+    <div class="compare">
+      <div class="compare-card bad">
+        <div class="compare-title bad-t">The module stack</div>
+        <ul>
+          <li>Slip booking module — separate subscription</li>
+          <li>Contracts & billing — another module, another fee</li>
+          <li>Fuel dock, POS, work orders — features you'll never use, priced in anyway</li>
+          <li>$500–700+/month once you add what you actually need</li>
+          <li>Sales calls and contracts to get started</li>
+        </ul>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title good-t">Slipwise</div>
+        <ul>
+          <li>Slip map, contracts, waitlist, invoicing, and payments — one product</li>
+          <li>One flat monthly fee by slip count, no module stacking</li>
+          <li>Nothing to configure around features you don't need</li>
+          <li>$79–149/month depending on slip count</li>
+          <li>No setup fee, no annual contract requirement</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-kicker">What's included</div>
+      <h2 class="section-h">Everything the office actually touches every day</h2>
+      <p class="section-sub">No fuel dock, no ship's store inventory, no multi-location tooling. Just the operational core.</p>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <div class="feature-num">01 · Slip map</div>
+        <h3>See every slip's status at a glance</h3>
+        <p>
+          A visual layout of your docks and slips, color-coded Available / Occupied / Reserved /
+          Maintenance. Click any slip for the current occupant, vessel, contract, and balance
+          owed. Set up a full 150-slip layout in under 30 minutes.
+        </p>
+      </div>
+      <div class="feature-visual">
+        <div class="viz-slips">
+          <div class="viz-slip viz-a">A1<span>Open</span></div>
+          <div class="viz-slip viz-o">A2<span>Occupied</span></div>
+          <div class="viz-slip viz-a">A3<span>Open</span></div>
+          <div class="viz-slip viz-m">A4<span>Hold</span></div>
+          <div class="viz-slip viz-a">B1<span>Open</span></div>
+          <div class="viz-slip viz-o">B2<span>Occupied</span></div>
+          <div class="viz-slip viz-a">B3<span>Open</span></div>
+          <div class="viz-slip viz-a">B4<span>Open</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-copy">
+        <div class="feature-num">02 · Contracts &amp; waitlist</div>
+        <h3>Fill an open slip in under 5 minutes</h3>
+        <p>
+          Create a contract — renter, vessel, rate, term — and the slip flips to Occupied while
+          the first invoice generates automatically. When a slip opens up, your waitlist queue
+          tells you exactly who's next, in order.
+        </p>
+      </div>
+      <div class="feature-visual">
+        <div class="viz-waitlist">
+          <div class="viz-wrow"><b>1. Sue Callahan</b><span class="viz-wchip">40'+, 30A</span></div>
+          <div class="viz-wrow"><b>2. Tom Reyes</b><span class="viz-wchip">50'+</span></div>
+          <div class="viz-wrow" style="opacity:.55"><b>3. J. Alvarez</b><span class="viz-wchip">Any dock</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <div class="feature-num">03 · Invoicing &amp; reporting</div>
+        <h3>Know what you made and who still owes you</h3>
+        <p>
+          Auto-generated invoices from every contract, manual charges for one-off fees, and
+          payment recording that updates balances in real time. Pull revenue, occupancy, and
+          outstanding-balance reports as CSV without contacting support.
+        </p>
+      </div>
+      <div class="feature-visual">
+        <div class="viz-report">
+          <div class="viz-rcell"><b>$4,200</b><span>REVENUE MTD</span></div>
+          <div class="viz-rcell"><b>86%</b><span>OCCUPANCY</span></div>
+          <div class="viz-rcell"><b>$1,150</b><span>OUTSTANDING</span></div>
+          <div class="viz-rcell"><b>3</b><span>RENEWALS (60D)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-copy">
+        <div class="feature-num">04 · AI slip-map import</div>
+        <h3>Skip the manual layout entirely</h3>
+        <p>
+          Upload a site map, aerial photo, or a photo of a hand-drawn sketch — Slipwise drafts
+          your dock and slip layout for you to review and confirm. AI drafts, you approve.
+          Nothing saves without your review.
+        </p>
+      </div>
+      <div class="feature-visual">
+        <div class="viz-invoice">
+          <div class="viz-irow head"><span>Dock</span><span>Slips</span><span>Confidence</span></div>
+          <div class="viz-irow"><span>A Dock</span><span>8 detected</span><span class="viz-badge">High</span></div>
+          <div class="viz-irow"><span>B Dock</span><span>6 detected</span><span class="viz-badge" style="background:#fbf0d8;color:#97650a;">Review</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center;">
+      <div class="section-kicker" style="text-align:center;">Pricing</div>
+      <h2 class="section-h">Flat by slip count. Nothing else to buy.</h2>
+      <p class="section-sub" style="margin:0 auto;">No modules, no per-feature add-ons, no setup fee.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amt">$79<span>/mo</span></div>
+        <div class="price-slips">Up to 50 slips</div>
+        <ul>
+          <li>Slip map &amp; layout builder</li>
+          <li>Contracts &amp; waitlist</li>
+          <li>Invoicing &amp; CSV reports</li>
+          <li>AI slip-map import</li>
+        </ul>
+        <a class="btn" href="https://slipwise-one.vercel.app/login">Start free</a>
+      </div>
+      <div class="price-card feat">
+        <div class="price-tag">Most marinas</div>
+        <div class="price-tier">Standard</div>
+        <div class="price-amt">$109<span>/mo</span></div>
+        <div class="price-slips">51–100 slips</div>
+        <ul>
+          <li>Everything in Starter</li>
+          <li>Online payment collection</li>
+          <li>Convenience-fee pass-through</li>
+          <li>Priority support</li>
+        </ul>
+        <a class="btn btn-primary" href="https://slipwise-one.vercel.app/login">Start free</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Pro</div>
+        <div class="price-amt">$149<span>/mo</span></div>
+        <div class="price-slips">101–150 slips</div>
+        <ul>
+          <li>Everything in Standard</li>
+          <li>Public transient booking page</li>
+          <li>Recurring billing for seasonal contracts</li>
+          <li>Onboarding call included</li>
+        </ul>
+        <a class="btn" href="https://slipwise-one.vercel.app/login">Start free</a>
+      </div>
+    </div>
+    <p class="pricing-foot">150+ slips? <a href="#" style="color:var(--sea-600); font-weight:600;">Talk to us about custom pricing →</a></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>Map your slips and take your first payment today.</h2>
+      <p>No setup fee, no annual contract, no sales call required to get started.</p>
+      <a class="btn btn-primary btn-lg" href="https://slipwise-one.vercel.app/login">Sign in to Slipwise</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div class="foot-brand">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 8a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4Z"/><path d="M4 15c1.5 3 4.5 5 8 5s6.5-2 8-5"/><circle cx="12" cy="15" r="1"/></svg>
+      Slipwise
+    </div>
+    <div class="foot-note">© 2026 Slipwise. Flat-priced marina management.</div>
+  </div>
+</footer>
+
+</body>
+</html>
