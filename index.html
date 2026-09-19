@@ -73,6 +73,19 @@
   .btn-primary:hover { background: linear-gradient(180deg, #128cc6 0%, var(--sea-700) 100%); box-shadow: 0 2px 8px rgba(14,122,176,.32); }
   .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 11px; }
 
+  /* Loading state for links that navigate to the app (cold-start lag) */
+  .btn.is-loading { pointer-events: none; opacity: .85; }
+  .btn.is-loading .btn-label { visibility: hidden; }
+  .btn.is-loading .btn-spinner { display: inline-block; }
+  .btn-spinner {
+    display: none; position: absolute; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%;
+    animation: btn-spin .7s linear infinite;
+  }
+  .btn:not(.btn-primary) .btn-spinner { border-color: rgba(18,32,43,.25); border-top-color: var(--ink); }
+  .btn { position: relative; }
+  @keyframes btn-spin { to { transform: rotate(360deg); } }
+
   /* ---------- Hero ---------- */
   .hero { padding: 84px 0 96px; position: relative; overflow: hidden; }
   .hero::before {
@@ -486,6 +499,17 @@
     <div class="foot-note">© 2026 Slipwise. Flat-priced marina management.</div>
   </div>
 </footer>
+
+<script>
+  // Wrap login/app-link text so a spinner can show, and give instant feedback
+  // on click (Vercel serverless cold-start can add a second or two of lag).
+  document.querySelectorAll('a[href*="slipwise-one.vercel.app"]').forEach((a) => {
+    a.innerHTML = '<span class="btn-label">' + a.textContent + '</span><span class="btn-spinner"></span>';
+    a.addEventListener('click', () => {
+      document.querySelectorAll('a[href*="slipwise-one.vercel.app"]').forEach((el) => el.classList.add('is-loading'));
+    });
+  });
+</script>
 
 </body>
 </html>
