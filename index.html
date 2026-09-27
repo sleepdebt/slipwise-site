@@ -119,7 +119,16 @@
   .mock-side { background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-700) 100%); padding: 20px 14px; }
   .mock-side-item { padding: 8px 10px; border-radius: 7px; font-size: 12.5px; color: #bcdae8; margin-bottom: 3px; font-weight: 550; }
   .mock-side-item.active { background: rgba(255,255,255,.14); color: #fff; }
-  .mock-main { padding: 26px 28px; }
+  .mock-main { padding: 26px 28px; position: relative; min-height: 236px; }
+  .mock-panel {
+    position: absolute; inset: 26px 28px; opacity: 0; visibility: hidden;
+    transform: translateY(6px); transition: opacity .45s var(--ease), transform .45s var(--ease), visibility 0s linear .45s;
+  }
+  .mock-panel.active {
+    opacity: 1; visibility: visible; transform: translateY(0);
+    transition: opacity .45s var(--ease), transform .45s var(--ease), visibility 0s;
+  }
+  .mock-side-item { transition: background .3s var(--ease), color .3s var(--ease); }
   .mock-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
   .mock-stat { background: var(--surface-sunken); border-radius: 10px; padding: 14px; text-align: center; }
   .mock-stat b { display: block; font-size: 21px; color: var(--navy-900); }
@@ -274,32 +283,82 @@
       <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
       <div class="mock-body">
         <div class="mock-side">
-          <div class="mock-side-item active">Dashboard</div>
-          <div class="mock-side-item">Slip Map</div>
-          <div class="mock-side-item">Contracts</div>
-          <div class="mock-side-item">Waitlist</div>
-          <div class="mock-side-item">Invoices</div>
-          <div class="mock-side-item">Reports</div>
+          <div class="mock-side-item active" data-screen="0">Dashboard</div>
+          <div class="mock-side-item" data-screen="1">Slip Map</div>
+          <div class="mock-side-item" data-screen="2">Waitlist</div>
+          <div class="mock-side-item" data-screen="3">Invoices</div>
         </div>
         <div class="mock-main">
-          <div class="mock-stat-row">
-            <div class="mock-stat"><b>14</b><span>SLIPS</span></div>
-            <div class="mock-stat"><b>12</b><span>AVAILABLE</span></div>
-            <div class="mock-stat"><b>1</b><span>OCCUPIED</span></div>
-            <div class="mock-stat"><b>$4,200</b><span>OUTSTANDING</span></div>
-          </div>
-          <div class="mock-rows">
-            <div class="mock-row" style="background:var(--surface-sunken); font-weight:700; color:var(--ink-faint); font-size:11px; text-transform:uppercase;">
-              <span>SLIP</span><span>RENTER</span><span>STATUS</span>
+          <div class="mock-panel active" data-screen="0">
+            <div class="mock-stat-row">
+              <div class="mock-stat"><b>14</b><span>SLIPS</span></div>
+              <div class="mock-stat"><b>12</b><span>AVAILABLE</span></div>
+              <div class="mock-stat"><b>1</b><span>OCCUPIED</span></div>
+              <div class="mock-stat"><b>$4,200</b><span>OUTSTANDING</span></div>
             </div>
-            <div class="mock-row"><span>A1</span><span>Marv Hendricks</span><span class="mock-pill">ACTIVE</span></div>
-            <div class="mock-row"><span>B6</span><span>—</span><span class="mock-pill" style="background:#f7edd2;color:#6e5514;">HOLD</span></div>
+            <div class="mock-rows">
+              <div class="mock-row" style="background:var(--surface-sunken); font-weight:700; color:var(--ink-faint); font-size:11px; text-transform:uppercase;">
+                <span>SLIP</span><span>RENTER</span><span>STATUS</span>
+              </div>
+              <div class="mock-row"><span>A1</span><span>Marv Hendricks</span><span class="mock-pill">ACTIVE</span></div>
+              <div class="mock-row"><span>B6</span><span>—</span><span class="mock-pill" style="background:#f7edd2;color:#6e5514;">HOLD</span></div>
+            </div>
+          </div>
+          <div class="mock-panel" data-screen="1">
+            <div class="viz-slips" style="gap:10px;">
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">A1<span>Open</span></div>
+              <div class="viz-slip viz-o" style="width:76px;height:62px;">A2<span>Occupied</span></div>
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">A3<span>Open</span></div>
+              <div class="viz-slip viz-m" style="width:76px;height:62px;">A4<span>Hold</span></div>
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">B1<span>Open</span></div>
+              <div class="viz-slip viz-o" style="width:76px;height:62px;">B2<span>Occupied</span></div>
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">B3<span>Open</span></div>
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">B4<span>Open</span></div>
+              <div class="viz-slip viz-o" style="width:76px;height:62px;">B5<span>Occupied</span></div>
+              <div class="viz-slip viz-a" style="width:76px;height:62px;">B6<span>Open</span></div>
+            </div>
+          </div>
+          <div class="mock-panel" data-screen="2">
+            <div class="viz-waitlist" style="gap:12px;">
+              <div class="viz-wrow" style="padding:14px 16px;"><b>1. Sue Callahan</b><span class="viz-wchip">40'+, 30A</span></div>
+              <div class="viz-wrow" style="padding:14px 16px;"><b>2. Tom Reyes</b><span class="viz-wchip">50'+</span></div>
+              <div class="viz-wrow" style="padding:14px 16px; opacity:.6;"><b>3. J. Alvarez</b><span class="viz-wchip">Any dock</span></div>
+              <div class="viz-wrow" style="padding:14px 16px; opacity:.4;"><b>4. K. Nguyen</b><span class="viz-wchip">30'+</span></div>
+            </div>
+          </div>
+          <div class="mock-panel" data-screen="3">
+            <div class="mock-stat-row" style="grid-template-columns: repeat(3, 1fr);">
+              <div class="mock-stat"><b>$4,200</b><span>REVENUE MTD</span></div>
+              <div class="mock-stat"><b>86%</b><span>OCCUPANCY</span></div>
+              <div class="mock-stat"><b>$1,150</b><span>OUTSTANDING</span></div>
+            </div>
+            <div class="viz-invoice">
+              <div class="viz-irow head"><span>Renter</span><span>Amount</span><span>Status</span></div>
+              <div class="viz-irow"><span>Marv Hendricks</span><span>$620</span><span class="viz-badge">Paid</span></div>
+              <div class="viz-irow"><span>Sue Callahan</span><span>$540</span><span class="viz-badge" style="background:#fbf0d8;color:#97650a;">Due</span></div>
+              <div class="viz-irow"><span>Tom Reyes</span><span>$610</span><span class="viz-badge">Paid</span></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  // Cycle the hero product mock through a few screens to show navigation in action.
+  (() => {
+    const sideItems = document.querySelectorAll('.mock-side-item');
+    const panels = document.querySelectorAll('.mock-panel');
+    if (!sideItems.length || !panels.length) return;
+    let i = 0;
+    setInterval(() => {
+      i = (i + 1) % sideItems.length;
+      sideItems.forEach((el) => el.classList.toggle('active', Number(el.dataset.screen) === i));
+      panels.forEach((el) => el.classList.toggle('active', Number(el.dataset.screen) === i));
+    }, 2800);
+  })();
+</script>
 
 <section class="problem">
   <div class="wrap">
